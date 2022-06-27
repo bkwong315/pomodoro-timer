@@ -13,7 +13,7 @@ class Timer extends React.Component {
         this.state = {
             timeRemaining: 1500,
             workTime: 1500,
-            shortBreakTime: 125,
+            shortBreakTime: 300,
             longBreakTime: 900,
             intervalID: 0,
             pomodoroInterval: 4,
@@ -26,6 +26,7 @@ class Timer extends React.Component {
         this.updateDisplay = this.updateDisplay.bind(this);
         this.updateTimer = this.updateTimer.bind(this);
         this.toggleTimer = this.toggleTimer.bind(this);
+        this.changeTimer = this.changeTimer.bind(this);
         this.resetTimer = this.resetTimer.bind(this);
         this.setTimer = this.setTimer.bind(this);
     }
@@ -64,7 +65,6 @@ class Timer extends React.Component {
     resetTimer() {
         clearInterval(this.state.intervalID);
         this.setTimer();
-        alert("Reset!");
     }
 
     toggleTimerOptions() {
@@ -94,8 +94,6 @@ class Timer extends React.Component {
             pomodoroIntervalValue: !isNaN(parseInt(pomodoroIntervalInput.val().trim())) ? parseInt(pomodoroIntervalInput.val().trim()) : this.state.pomodoroInterval
         }
 
-        console.log(inputValues.pomodoroIntervalValue);
-
         this.setState({
             timeRemaining: inputValues.workTimeValue,
             workTime: inputValues.workTimeValue,
@@ -109,7 +107,6 @@ class Timer extends React.Component {
 
     updateTimer() {
         if(this.state.timeRemaining <= 0) {
-            console.log("Time Remaining: 0");
             this.toggleTimer();
 
             if(!this.state.onBreak) {
@@ -155,9 +152,42 @@ class Timer extends React.Component {
         display.html(`${remainingMinStr}:${remainingSecStr}`);
     }
 
+    changeTimer(timerType) {
+        clearInterval(this.state.intervalID);
+        $("#toggle-btn").html("Start");
+
+        if(timerType == "work") {
+            this.setState({
+                timeRemaining: this.state.workTime,
+                onBreak: false
+            }, this.updateDisplay);
+        }
+        else {
+            let remainingTime = 0;
+
+            if(timerType == "short") {
+                remainingTime = this.state.shortBreakTime;
+            }
+            else if(timerType == "long") {
+                remainingTime = this.state.longBreakTime;
+            }
+
+            this.setState({
+                timeRemaining: remainingTime,
+                onBreak: true
+            }, this.updateDisplay);
+        }
+        
+    }
+
     render() {
         return (
             <div>
+                <div className="timer-selector container d-flex flex-row justify-content-center">
+                    <div className="work-time-selector task-selector  text-center px-4" onClick={() => {this.changeTimer("work")}}>Work Time</div>
+                    <div className="short-break-selector task-selector text-center px-4" onClick={() => {this.changeTimer("short")}}>Short Break</div>
+                    <div className="long-break-selector task-selector text-center px-4" onClick={() => {this.changeTimer("long")}}>Long Break</div>
+                </div>
                 <h1 className="timer-display text-center display-1">00:00</h1>
                 <div className="input-container container d-flex flex-row justify-content-center">
                     <div className="container d-flex flex-column">

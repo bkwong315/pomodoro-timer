@@ -1,6 +1,7 @@
 import {createRoot} from "react-dom/client";
 import React from "react";
 import Timer from "./timer.js";
+import './style.css';
 
 class App extends React.Component {
     constructor(props) {
