@@ -16,12 +16,15 @@ class Timer extends React.Component {
             shortBreakTime: 125,
             longBreakTime: 900,
             intervalID: 0,
-            pomodoroInterval: 3,
+            pomodoroInterval: 4,
+            pomoCount: 0,
+            onBreak: false
         }
 
         this.toggleTimerOptions = this.toggleTimerOptions.bind(this);
         this.createInterval = this.createInterval.bind(this);
         this.updateDisplay = this.updateDisplay.bind(this);
+        this.updateTimer = this.updateTimer.bind(this);
         this.toggleTimer = this.toggleTimer.bind(this);
         this.resetTimer = this.resetTimer.bind(this);
         this.setTimer = this.setTimer.bind(this);
@@ -38,7 +41,7 @@ class Timer extends React.Component {
                     return {
                         timeRemaining: prevState.timeRemaining - 1
                     }
-                }, this.updateDisplay)
+                }, this.updateTimer)
             }, 1000)
         })
     }
@@ -85,28 +88,58 @@ class Timer extends React.Component {
         let pomodoroIntervalInput = $(".pomodoro-interval-input");
 
         let inputValues = {
-            workTimeValue: !isNaN(parseInt(workTimeInput.val().trim())) ? parseInt(workTimeInput.val().trim()) : this.state.workTime,
-            shortBreakValue: !isNaN(parseInt(shortBreakInput.val().trim()))? parseInt(shortBreakInput.val().trim()) : this.state.shortBreakTime,
-            longBreakValue: !isNaN(parseInt(longBreakInput.val().trim())) ? parseInt(longBreakInput.val().trim()) : this.state.longBreakTime,
+            workTimeValue: !isNaN(parseFloat(workTimeInput.val().trim())) ? parseFloat(workTimeInput.val().trim())*60 : this.state.workTime,
+            shortBreakValue: !isNaN(parseFloat(shortBreakInput.val().trim()))? parseFloat(shortBreakInput.val().trim())*60 : this.state.shortBreakTime,
+            longBreakValue: !isNaN(parseFloat(longBreakInput.val().trim())) ? parseFloat(longBreakInput.val().trim())*60 : this.state.longBreakTime,
             pomodoroIntervalValue: !isNaN(parseInt(pomodoroIntervalInput.val().trim())) ? parseInt(pomodoroIntervalInput.val().trim()) : this.state.pomodoroInterval
         }
 
+        console.log(inputValues.pomodoroIntervalValue);
+
         this.setState({
-            timeRemaining: workTimeInput.val()*60,
-            workTime: workTimeInput.val()*60,
-            shortBreakTime: shortBreakInput.val()*60,
-            longBreakTime: longBreakInput.val()*60,
-            pomdoroInput: pomodoroIntervalInput.val() - 1
+            timeRemaining: inputValues.workTimeValue,
+            workTime: inputValues.workTimeValue,
+            shortBreakTime: inputValues.shortBreakValue,
+            longBreakTime: inputValues.longBreakValue,
+            pomodoroInterval: inputValues.pomodoroIntervalValue
         }, this.updateDisplay);
 
         this.toggleTimerOptions();
     }
 
-    updateDisplay() {
+    updateTimer() {
         if(this.state.timeRemaining <= 0) {
-            clearInterval(this.state.intervalID);
+            console.log("Time Remaining: 0");
+            this.toggleTimer();
+
+            if(!this.state.onBreak) {
+                let remainingTime = this.state.shortBreakTime;
+                let newPomoCount = this.state.pomoCount + 1;
+                let newOnBreak = true;
+
+                if(newPomoCount == this.state.pomodoroInterval) {
+                    remainingTime = this.state.longBreakTime;
+                    newPomoCount = 0;
+                }
+
+                this.setState({
+                    timeRemaining: remainingTime,
+                    pomoCount: newPomoCount,
+                    onBreak: newOnBreak
+                }, this.updateDisplay);
+            }
+            else {
+                this.setState({
+                    timeRemaining: this.state.workTime,
+                    onBreak: false
+                }, this.updateDisplay);
+            }
         }
 
+        this.updateDisplay();
+    }
+
+    updateDisplay() {
         let display = $(".timer-display");
         let remainingMinInt = 0
         let remainingSecInt = 0;
