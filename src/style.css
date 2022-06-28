@@ -1,0 +1,9 @@
+body {
+    min-height: 100vh;
+    background-color: lightblue;
+}
+
+.task-selector:hover {
+    border-bottom: 2px solid black;
+    background-color: rgba(255, 255, 255, .7);
+}
